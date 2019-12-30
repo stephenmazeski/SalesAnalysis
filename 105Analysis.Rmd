@@ -1,0 +1,213 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Imports
+
+```{r}
+library(DataComputing)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(writexl)
+library(bizdays)
+
+```
+
+
+
+
+
+```{r}
+
+head(vieworder2)
+```
+
+
+```{r}
+head(salesanalysis)
+
+```
+
+```{r}
+colnames(salesanalysis)
+```
+
+```{r}
+colnames(vieworder2)
+```
+```{r}
+head(Refridgerate)
+
+```
+```{r}
+head(Frozen2)
+
+```
+```{r}
+Refridgerate <- Refridgerate %>% mutate(Product = "R")
+
+```
+```{r}
+Frozen2 <- Frozen2 %>% mutate(Product = "F")
+head(Frozen2)
+
+
+```
+```{r}
+products <- rbind(Frozen2, Refridgerate)
+
+tail(products)
+```
+
+
+
+
+```{r}
+Merged <- merge(salesanalysis, vieworder2, by = "SalesNum")
+Merged2<- full_join(Merged, products, by = "ItemID")
+
+```
+
+```{r}
+Merged2$Product[is.na(Merged2$Product)] = 'O'
+colnames((Merged2))
+
+
+
+```
+
+
+```{r}
+
+Merged_Cut <- Merged2 %>% select(SalesNum, Invoice, SalesNum, Category, ShipToState, ItemID, Quantity, DateOrdered, Date, Shipped, ItemID, Product, AddressType)
+view(Merged_Cut)
+
+```
+
+
+#Here we see from the data that DateShipped is the date in which ALL items are completed shipping. Date.y is the order date and I will change names accordingly
+
+```{r}
+names(Merged_Cut)[names(Merged_Cut) == "DateOrdered"] <- "OrderDate"
+names(Merged_Cut)[names(Merged_Cut) == "Date"] <- "FullyShipped"
+names(Merged_Cut)[names(Merged_Cut) == "Shipped"] <- "InvoiceShipped"
+
+head(Merged_Cut, 30)
+
+```
+
+```{r}
+
+Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed =as.integer( difftime(InvoiceShipped, OrderDate, unit = "days")))
+head(Merged_Cut,10)
+```
+
+
+
+```{r}
+Merged_Cut <- Merged_Cut %>% mutate(OrderDayoftheWeek = wday(OrderDate))
+Merged_Cut <- Merged_Cut %>% mutate(ShipmentDayoftheWeek = wday(InvoiceShipped))
+head(Merged_Cut)
+
+```
+
+
+```{r}
+# The logic behind this adjustment:
+
+# If a customer is a residential shipment, they cannot recieve shipments over a Sunday. Therefore the days delayed when an Order is ordered after Tuesday, yet comes before Wednesday (defaulting to the next week), the days delayed will be the original result subtracted by one.
+
+# For those who are commercial customers, it is a similar logic, but we subtract 2 instead because they cannot recieve shipments on the weekend as a whole.
+
+# This also will remove the extreme cases such as: Product being out of stock, shipment put on hold, etc...
+
+
+
+#Not entirely correct yet.
+#Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed = ifelse(AddressType == "R" & OrderDayoftheWeek > 3 &  ShipmentDayoftheWeek < 3, DaysDelayed - 1, DaysDelayed))
+#Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed = ifelse(AddressType == "D" & OrderDayoftheWeek > 3 &  ShipmentDayoftheWeek < 3, DaysDelayed - 2, DaysDelayed))
+
+
+
+```
+
+
+
+
+```{r}
+#write_xlsx(x=Merged_Cut, path="Cleaned_Data_MAIN.csv",col_names=T)
+```
+
+
+```{r}
+
+# Placeholder graph for after new data is sscraped.
+
+```
+
+
+```{r}
+
+DidNotMakeWedCut <- Merged_Cut %>% filter(OrderDayoftheWeek == 4,DaysDelayed== 5)
+head(DidNotMakeWedCut)
+#view(DidNotMakeWedCut)
+```
+
+
+```{r}
+
+
+AddressSplit <- Merged_Cut %>% group_by(AddressType) %>% summarise(AddressTypeForOrder=n())
+AddressSplit
+```
+
+
+```{r}
+
+#Products bought from 105
+# F = Frozen
+# O = Other
+# R = Refridgerated
+ProductsBought<- Merged_Cut %>% group_by(Product) %>% summarise(ProductTypeSpred=n())
+ProductsBought
+
+```
+
+
+```{r}
+
+#Delays_Spread <- Merged_Cut %>% group_by(DaysDelayed, AddressType, Product) %>% summarise(DaysDelayedCount=n())
+View(Delays_Spread)
+
+
+# Consider this: 
+
+```
+
+```{r}
+
+# States based on https://www.webstaurantstore.com/newwebadmin/mvc/logistics:warehouseTransitTimes/ Zones 1&2
+# By state, these orders have the following attributes:::
+
+
+# State within the 1-2 day window
+# Ordered on Wednesday
+# Frozen or Regridgerated Goods
+# Were held for 5 days, until the following Monday, though could have arrived by Saturday
+
+StateSpread <- Merged_Cut %>% group_by(ShipToState) %>% filter(ShipToState == "NY" | ShipToState == "PA"| ShipToState == "ME"| ShipToState == "VT"| ShipToState == "NH"| ShipToState == "MA"| ShipToState == "RI"| ShipToState == "CT"| ShipToState == "NJ"| ShipToState == "DE"| ShipToState == "MD"| ShipToState == "WV"| ShipToState == "VA"| ShipToState == "MI"| ShipToState == "OH"| ShipToState == "MI"| ShipToState == "IN"| ShipToState == "IL"| ShipToState == "KY"| ShipToState == "TN"| ShipToState == "AL"| ShipToState == "NC"| ShipToState == "SC"| ShipToState == "GA"| ShipToState == "FL", Product == "F" | Product == "R", AddressType == "R",OrderDayoftheWeek == 4,DaysDelayed > 4 ) 
+
+(StateSpread)
+
+```
+Sum of the above is 79 orders over two weeks of analyzing Wednesday data specifically
+
+```{r}
+
+
+```
+
+
+
+
