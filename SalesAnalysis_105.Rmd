@@ -14,7 +14,14 @@ library(bizdays)
 
 ```
 
+```{r}
+library(readxl)
+Frozen2 <- read_excel("C:/Users/smazeski/Desktop/Frozen2.xlsx")
+Refridgerate <- read_excel("C:/Users/smazeski/Desktop/Refridgerate.xlsx")
+vieworder2 <- read_excel("C:/Users/smazeski/Desktop/WinterData/vieworder2.xlsx")
+salesanalysis <- read_excel("C:/Users/smazeski/Desktop/WinterData/salesanalysis.xlsx")
 
+```
 
 
 
@@ -81,7 +88,6 @@ colnames((Merged2))
 ```{r}
 
 Merged_Cut <- Merged2 %>% select(SalesNum, Invoice, SalesNum, Category, ShipToState, ItemID, Quantity, DateOrdered, Date, Shipped, ItemID, Product, AddressType)
-view(Merged_Cut)
 
 ```
 
@@ -171,7 +177,7 @@ ProductsBought
 ```{r}
 
 #Delays_Spread <- Merged_Cut %>% group_by(DaysDelayed, AddressType, Product) %>% summarise(DaysDelayedCount=n())
-View(Delays_Spread)
+#View(Delays_Spread)
 
 
 # Consider this: 
@@ -204,48 +210,4 @@ Sum of the above is 79 orders over two weeks of analyzing Wednesday data specifi
 ```
 
 
-
-
-```{r}
-
-
-```
-
-
-
-```{r}
-
-
-```
-
-```{r}
-
-
-```
-
-
-```{r}
-
-
-```
-
-
-
-```{r}
-
-
-```
-
-
-
-```{r}
-
-
-```
-
-
-```{r}
-
-
-```
 
