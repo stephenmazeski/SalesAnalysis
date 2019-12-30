@@ -16,8 +16,8 @@ library(bizdays)
 
 ```{r}
 library(readxl)
-Frozen2 <- read_excel("C:/Users/smazeski/Desktop/Frozen2.xlsx")
-Refridgerate <- read_excel("C:/Users/smazeski/Desktop/Refridgerate.xlsx")
+Frozen2 <- read_excel("C:/Users/smazeski/Desktop/WinterData/Frozen.xlsx")
+Refridgerate <- read_excel("C:/Users/smazeski/Desktop/WinterData/Refridgerate.xlsx")
 vieworder2 <- read_excel("C:/Users/smazeski/Desktop/WinterData/vieworder2.xlsx")
 salesanalysis <- read_excel("C:/Users/smazeski/Desktop/WinterData/salesanalysis.xlsx")
 
