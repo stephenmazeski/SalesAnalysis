@@ -106,6 +106,7 @@ head(Merged_Cut, 30)
 ```{r}
 
 Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed =as.integer( difftime(InvoiceShipped, OrderDate, unit = "days")))
+Merged_Cut <- Merged_Cut %>% filter(DaysDelayed < 8)
 head(Merged_Cut,10)
 ```
 
@@ -115,25 +116,27 @@ head(Merged_Cut,10)
 Merged_Cut <- Merged_Cut %>% mutate(OrderDayoftheWeek = wday(OrderDate))
 Merged_Cut <- Merged_Cut %>% mutate(ShipmentDayoftheWeek = wday(InvoiceShipped))
 
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 1& Product != 'O', DaysDelayed - 1, DaysDelayed))
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'R' & Product != 'O', DaysDelayed - 1, DaysDelayed))
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'C'& Product != 'O', DaysDelayed - 1, DaysDelayed))
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 1 & Product != 'O' & DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
 
-head(Merged_Cut)
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'R' & Product != 'O'& DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
+
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'C'& Product != 'O'& DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
+
+view(Merged_Cut)
 
 ```
 ```{r}
 MergedSplit <- Merged_Cut %>% filter(AddressType == 'C' | AddressType == 'R') %>%group_by(Product, AddressType, OrderDayoftheWeek) %>% summarise(AvgDayShip = mean(DaysDelayed))
 
 
-ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point()+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
-
+ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
+#view(Merged_Cut)
 ```
 
 ```{r}
 
 
-MergedSplit
+view(MergedSplit)
 ```
 
 
@@ -193,7 +196,11 @@ ProductsBought
 # Frozen or Regridgerated Goods
 # Were held for 5 days, until the following Monday, though could have arrived by Saturday
 
-StateSpread <- Merged_Cut %>% group_by(ShipToState) %>% filter(ShipToState == "NY" | ShipToState == "PA"| ShipToState == "ME"| ShipToState == "VT"| ShipToState == "NH"| ShipToState == "MA"| ShipToState == "RI"| ShipToState == "CT"| ShipToState == "NJ"| ShipToState == "DE"| ShipToState == "MD"| ShipToState == "WV"| ShipToState == "VA"| ShipToState == "MI"| ShipToState == "OH"| ShipToState == "MI"| ShipToState == "IN"| ShipToState == "IL"| ShipToState == "KY"| ShipToState == "TN"| ShipToState == "AL"| ShipToState == "NC"| ShipToState == "SC"| ShipToState == "GA"| ShipToState == "FL", Product == "F" | Product == "R", AddressType == "R",OrderDayoftheWeek == 4,DaysDelayed > 4 ) 
+StateSpread <- Merged_Cut %>% group_by(ShipToState) %>% mutate(Zone = ifelse(ShipToState == "NY" | ShipToState == "PA"| ShipToState == "ME"| ShipToState == "VT"| ShipToState == "NH"| ShipToState == "MA"| ShipToState == "RI"| ShipToState == "CT"| ShipToState == "NJ"| ShipToState == "DE"| ShipToState == "MD"| ShipToState == "WV"| ShipToState == "VA"| ShipToState == "MI"| ShipToState == "OH"| ShipToState == "MI"| ShipToState == "IN"| ShipToState == "IL"| ShipToState == "KY"| ShipToState == "TN"| ShipToState == "AL"| ShipToState == "NC"| ShipToState == "SC"| ShipToState == "GA"| ShipToState == "FL"| ShipToState == "DC", 2,
+                                                               ifelse(ShipToState == "MS" | ShipToState == "LA"| ShipToState == "WI"| ShipToState == "IA"| ShipToState == "MO"| ShipToState == "OK"| ShipToState == "TX"| ShipToState == "MN"| ShipToState == "OK"| ShipToState == "KS"| ShipToState == "SD"| ShipToState == "ND" | ShipToState == "AR", 3,
+                                                               ifelse(ShipToState == "NM" | ShipToState == "AZ"| ShipToState == "MT"| ShipToState == "WY"| ShipToState == "NE"| ShipToState == "CO", 4,
+                                                               ifelse(ShipToState == "ID" | ShipToState == "OR"| ShipToState == "CA"| ShipToState == "UT"| ShipToState == "NV"| ShipToState == "WA", 5,
+                                                               ifelse(ShipToState == "AK" | ShipToState == "HI",7, NA))))))
 
 (StateSpread)
 
@@ -201,11 +208,36 @@ StateSpread <- Merged_Cut %>% group_by(ShipToState) %>% filter(ShipToState == "N
 Sum of the above is 79 orders over two weeks of analyzing Wednesday data specifically
 
 ```{r}
+StateSpread<- StateSpread %>% filter(ShipToState!='HI' & ShipToState!='AK')
+MergedSplit2 <- StateSpread %>% filter(AddressType == 'C' | AddressType == 'R') %>%group_by(Product, AddressType, OrderDayoftheWeek, Zone) %>% summarise(AvgDayShip = mean(DaysDelayed))
 
 
+
+#ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
+ggplot(data=MergedSplit2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 4)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) 
 
 
 ```
 
+```{r}
 
+MergedSplit2
+```
 
+```{r}
+
+MergedSplitCount <- StateSpread %>% filter(AddressType == 'C' | AddressType == 'R') %>%group_by(Product, AddressType, OrderDayoftheWeek, Zone) %>% summarise(CountTotal = n())
+head(MergedSplitCount)
+```
+```{r}
+
+# 105 Orders by Shipping Zone over a two week period
+
+StateSpread %>% group_by(Zone) %>% summarise(ZoneCount = n())
+
+```
+
+```{r}
+ggplot(data=MergedSplitCount,aes(x=OrderDayoftheWeek,y=CountTotal))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) 
+
+```
