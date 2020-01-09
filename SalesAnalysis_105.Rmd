@@ -241,7 +241,8 @@ ggplot(data=MergedSplitCount,aes(x=OrderDayoftheWeek,y=CountTotal))+geom_point(s
 
 
 ```{r}
-
+MergedSplit3 <- StateSpread %>% filter(AddressType == 'C' | AddressType == 'R') %>%group_by(Product, AddressType, OrderDayoftheWeek, ShipToState) %>% summarise(AvgDayShip = mean(DaysDelayed))
+MergedSplit3
 
 ```
 
