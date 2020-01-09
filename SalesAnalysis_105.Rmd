@@ -114,28 +114,26 @@ head(Merged_Cut,10)
 ```{r}
 Merged_Cut <- Merged_Cut %>% mutate(OrderDayoftheWeek = wday(OrderDate))
 Merged_Cut <- Merged_Cut %>% mutate(ShipmentDayoftheWeek = wday(InvoiceShipped))
+
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 1& Product != 'O', DaysDelayed - 1, DaysDelayed))
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'R' & Product != 'O', DaysDelayed - 1, DaysDelayed))
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'C'& Product != 'O', DaysDelayed - 1, DaysDelayed))
+
 head(Merged_Cut)
 
 ```
+```{r}
+MergedSplit <- Merged_Cut %>% filter(AddressType == 'C' | AddressType == 'R') %>%group_by(Product, AddressType, OrderDayoftheWeek) %>% summarise(AvgDayShip = mean(DaysDelayed))
 
+
+ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point()+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
+
+```
 
 ```{r}
-# The logic behind this adjustment:
-
-# If a customer is a residential shipment, they cannot recieve shipments over a Sunday. Therefore the days delayed when an Order is ordered after Tuesday, yet comes before Wednesday (defaulting to the next week), the days delayed will be the original result subtracted by one.
-
-# For those who are commercial customers, it is a similar logic, but we subtract 2 instead because they cannot recieve shipments on the weekend as a whole.
-
-# This also will remove the extreme cases such as: Product being out of stock, shipment put on hold, etc...
 
 
-
-#Not entirely correct yet.
-#Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed = ifelse(AddressType == "R" & OrderDayoftheWeek > 3 &  ShipmentDayoftheWeek < 3, DaysDelayed - 1, DaysDelayed))
-#Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed = ifelse(AddressType == "D" & OrderDayoftheWeek > 3 &  ShipmentDayoftheWeek < 3, DaysDelayed - 2, DaysDelayed))
-
-
-
+MergedSplit
 ```
 
 
