@@ -214,13 +214,12 @@ MergedSplit2 <- StateSpread %>% filter(AddressType == 'C' | AddressType == 'R') 
 
 
 #ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
-ggplot(data=MergedSplit2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 4)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) 
+ggplot(data=MergedSplit2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) + ggtitle("Zone Impacts on How Long it Takes to Ship")
 
 
 ```
 
 ```{r}
-
 MergedSplit2
 ```
 
@@ -230,11 +229,9 @@ MergedSplitCount <- StateSpread %>% filter(AddressType == 'C' | AddressType == '
 head(MergedSplitCount)
 ```
 ```{r}
-
 # 105 Orders by Shipping Zone over a two week period
 
 StateSpread %>% group_by(Zone) %>% summarise(ZoneCount = n())
-
 ```
 
 ```{r}
@@ -253,32 +250,3 @@ ggplot(data=MergedSplitCount,aes(x=OrderDayoftheWeek,y=CountTotal))+geom_point(s
 
 ```
 
-```{r}
-
-
-```
-
-```{r}
-
-
-```
-
-```{r}
-
-
-```
-
-```{r}
-
-
-```
-
-```{r}
-
-
-```
-
-```{r}
-
-
-```
