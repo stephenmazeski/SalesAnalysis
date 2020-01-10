@@ -199,7 +199,7 @@ StateSpread <- Merged_Cut %>% group_by(ShipToState) %>% mutate(Zone = ifelse(Shi
                                                                ifelse(ShipToState == "AK" | ShipToState == "HI",7, NA))))))
 
 (StateSpread)
-
+Zone5Focus <- StateSpread %>% filter(Zone == 5, AddressType == 'C' | AddressType == 'R')
 ```
 Sum of the above is 79 orders over two weeks of analyzing Wednesday data specifically
 
@@ -253,6 +253,14 @@ ggplot(data=Zone2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+ae
 
 
 ```
+
+
+```{r}
+head(Zone5Focus, 15)
+
+```
+
+
 
 
 
