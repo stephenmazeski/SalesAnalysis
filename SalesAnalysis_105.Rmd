@@ -112,13 +112,19 @@ head(Merged_Cut,10)
 Merged_Cut <- Merged_Cut %>% mutate(OrderDayoftheWeek = wday(OrderDate))
 Merged_Cut <- Merged_Cut %>% mutate(ShipmentDayoftheWeek = wday(InvoiceShipped))
 
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 1 & Product != 'O' & DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 1 & DaysDelayed > 1, DaysDelayed - 1, DaysDelayed))
 
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'R' & Product != 'O'& DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7& DaysDelayed > 2, DaysDelayed - 2, DaysDelayed))
 
-Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'C'& Product != 'O'& DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
 
+Merged_Cut <- Merged_Cut %>% group_by(ShipToState) %>% mutate(Zone = ifelse(ShipToState == "NY" | ShipToState == "PA"| ShipToState == "ME"| ShipToState == "VT"| ShipToState == "NH"| ShipToState == "MA"| ShipToState == "RI"| ShipToState == "CT"| ShipToState == "NJ"| ShipToState == "DE"| ShipToState == "MD"| ShipToState == "WV"| ShipToState == "VA"| ShipToState == "MI"| ShipToState == "OH"| ShipToState == "MI"| ShipToState == "IN"| ShipToState == "IL"| ShipToState == "KY"| ShipToState == "TN"| ShipToState == "AL"| ShipToState == "NC"| ShipToState == "SC"| ShipToState == "GA"| ShipToState == "FL"| ShipToState == "DC", 2,
+                                                               ifelse(ShipToState == "MS" | ShipToState == "LA"| ShipToState == "WI"| ShipToState == "IA"| ShipToState == "MO"| ShipToState == "OK"| ShipToState == "TX"| ShipToState == "MN"| ShipToState == "OK"| ShipToState == "KS"| ShipToState == "SD"| ShipToState == "ND" | ShipToState == "AR", 3,
+                                                               ifelse(ShipToState == "NM" | ShipToState == "AZ"| ShipToState == "MT"| ShipToState == "WY"| ShipToState == "NE"| ShipToState == "CO", 4,
+                                                               ifelse(ShipToState == "ID" | ShipToState == "OR"| ShipToState == "CA"| ShipToState == "UT"| ShipToState == "NV"| ShipToState == "WA", 5,
+                                                               ifelse(ShipToState == "AK" | ShipToState == "HI",7, NA))))))
 #view(Merged_Cut)
+Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 6 & DaysDelayed > 2 & (Zone == 2 | Zone == 3|Zone==4|Zone==5| Zone==7), DaysDelayed - 2, DaysDelayed))
+
 
 ```
 ```{r}
@@ -132,7 +138,7 @@ ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size =
 ```{r}
 
 
-#view(MergedSplit)
+view(MergedSplit)
 ```
 
 
