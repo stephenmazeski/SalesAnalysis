@@ -4,17 +4,13 @@ output: html_notebook
 ---
 # Imports
 
-```{r}
+```{r Imports, include=FALSE}
 library(DataComputing)
 library(tidyverse)
 library(ggplot2)
 library(lubridate)
 library(writexl)
 library(bizdays)
-
-```
-
-```{r}
 library(readxl)
 Frozen2 <- read_excel("C:/Users/smazeski/Desktop/WinterData/Frozen.xlsx")
 Refridgerate <- read_excel("C:/Users/smazeski/Desktop/WinterData/Refridgerate.xlsx")
@@ -106,7 +102,7 @@ head(Merged_Cut, 30)
 ```{r}
 
 Merged_Cut <- Merged_Cut %>% mutate(DaysDelayed =as.integer( difftime(InvoiceShipped, OrderDate, unit = "days")))
-Merged_Cut <- Merged_Cut %>% filter(DaysDelayed < 8)
+Merged_Cut <- Merged_Cut %>% filter(DaysDelayed < 6)
 head(Merged_Cut,10)
 ```
 
@@ -122,7 +118,7 @@ Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & Addre
 
 Merged_Cut$DaysDelayed <- with(Merged_Cut, ifelse(OrderDayoftheWeek == 7 & AddressType == 'C'& Product != 'O'& DaysDelayed != 0, DaysDelayed - 1, DaysDelayed))
 
-view(Merged_Cut)
+#view(Merged_Cut)
 
 ```
 ```{r}
@@ -136,7 +132,7 @@ ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size =
 ```{r}
 
 
-view(MergedSplit)
+#view(MergedSplit)
 ```
 
 
@@ -214,7 +210,7 @@ MergedSplit2 <- StateSpread %>% filter(AddressType == 'C' | AddressType == 'R') 
 
 
 #ggplot(data=MergedSplit,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)#+facet_wrap(~Product,ncol=4) 
-ggplot(data=MergedSplit2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) + ggtitle("Zone Impacts on How Long it Takes to Ship")
+ggplot(data=MergedSplit2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) + labs(title = "105 Response Shipping Response to Customer Location", caption = "** Orders that took more than 5 days to ship have been removed **")
 
 
 ```
@@ -235,7 +231,7 @@ StateSpread %>% group_by(Zone) %>% summarise(ZoneCount = n())
 ```
 
 ```{r}
-ggplot(data=MergedSplitCount,aes(x=OrderDayoftheWeek,y=CountTotal))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4) 
+ggplot(data=MergedSplitCount,aes(x=OrderDayoftheWeek,y=CountTotal))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+facet_wrap(~Zone,ncol=4)+ ggtitle("Volume of Hometown by Predicted Days to Arive to Customer")
 
 ```
 
@@ -247,7 +243,16 @@ MergedSplit3
 ```
 
 ```{r}
+Zone2 <- MergedSplit2 %>% filter(Zone == 2)
+
+```
+
+
+```{r}
+ggplot(data=Zone2,aes(x=OrderDayoftheWeek,y=AvgDayShip))+geom_point(size = 3)+aes(colour=Product, shape = AddressType)+ ggtitle("105 Shipping to States that take 1 or 2 Days to Arrive")
 
 
 ```
+
+
 
